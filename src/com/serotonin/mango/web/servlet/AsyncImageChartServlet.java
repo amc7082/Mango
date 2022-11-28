@@ -149,7 +149,7 @@ public class AsyncImageChartServlet extends BaseInfoServlet {
             for (PointDataRetriever pdr : tasks.getTasks())
                 pdr.addToCollection(ptsc);
 
-            return ImageChartUtils.getChartData(ptsc, width, height);
+            return ImageChartUtils.getChartData(ptsc, null, null, null, null, width, height);
         }
         catch (StringIndexOutOfBoundsException e) {
             // no op
