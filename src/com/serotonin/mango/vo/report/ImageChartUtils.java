@@ -55,20 +55,20 @@ public class ImageChartUtils {
     private static final int NUMERIC_DATA_INDEX = 0;
     private static final int DISCRETE_DATA_INDEX = 1;
 
-    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, OutputStream out, int width,
+    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, String title, String xLabel, String yLabel, String yRef, OutputStream out, int width,
             int height) throws IOException {
-        writeChart(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), out, width, height);
+        writeChart(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), title, xLabel, yLabel, yRef, out, width, height);
     }
 
-    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, int width, int height) {
-        return getChartData(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), width, height);
+    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, String title, String xLabel, String yLabel, String yRef, int width, int height) {
+        return getChartData(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), title, xLabel, yLabel, yRef, width, height);
     }
 
-    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend,
+    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, String title, String xLabel, String yLabel, String yRef,
             int width, int height) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            writeChart(pointTimeSeriesCollection, showLegend, out, width, height);
+            writeChart(pointTimeSeriesCollection, showLegend, title, xLabel, yLabel, yRef, out, width, height);
             return out.toByteArray();
         }
         catch (IOException e) {
@@ -76,10 +76,10 @@ public class ImageChartUtils {
         }
     }
 
-    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend,
+    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, String title, String xLabel, String yLabel, String yRef,
             OutputStream out, int width, int height) throws IOException {
 
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(null, null, null, null, showLegend, false, false);
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(title, xLabel, yLabel, null, showLegend, false, false);
         chart.setBackgroundPaint(SystemSettingsDao.getColour(SystemSettingsDao.CHART_BACKGROUND_COLOUR));
 
         XYPlot plot = chart.getXYPlot();
