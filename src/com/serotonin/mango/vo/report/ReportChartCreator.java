@@ -147,7 +147,7 @@ public class ReportChartCreator {
             if (ptsc.hasData()) {
                 if (inlinePrefix != null)
                     model.put("chartName", inlinePrefix + pointStat.getChartName());
-                pointStat.setImageData(ImageChartUtils.getChartData(ptsc, POINT_IMAGE_WIDTH, POINT_IMAGE_HEIGHT));
+                pointStat.setImageData(ImageChartUtils.getChartData(ptsc, pointStat.getTitle(), pointStat.xLabel, pointStat.yLabel, pointStat.getyRef(), POINT_IMAGE_WIDTH, POINT_IMAGE_HEIGHT));
             }
         }
 
@@ -161,7 +161,7 @@ public class ReportChartCreator {
                 model.put("chartName", IMAGE_SERVLET + chartName);
             }
 
-            imageData = ImageChartUtils.getChartData(ptsc, true, IMAGE_WIDTH, IMAGE_HEIGHT);
+            imageData = ImageChartUtils.getChartData(ptsc,true, null, null, null, null, IMAGE_WIDTH, IMAGE_HEIGHT);
         }
 
         List<EventInstance> events = null;
@@ -282,6 +282,11 @@ public class ReportChartCreator {
         private TimeSeries numericTimeSeries;
         private Color numericTimeSeriesColor;
         private DiscreteTimeSeries discreteTimeSeries;
+        private String type;
+        private String title;
+        private String xLabel;
+        private String yLabel;
+        private String yRef;
         private byte[] imageData;
 
         public PointStatistics(int reportPointId) {
@@ -421,6 +426,46 @@ public class ReportChartCreator {
         public String getChartName() {
             return "reportPointChart" + reportPointId + ".png";
         }
+
+        public String getType() {
+            return this.type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getTitle() {
+            return this.title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getxLabel() {
+            return this.xLabel;
+        }
+
+        public void setxLabel(String xLabel) {
+            this.xLabel = xLabel;
+        }
+
+        public String getyLabel() {
+            return this.yLabel;
+        }
+
+        public void setyLabel(String yLabel) {
+            this.yLabel = yLabel;
+        }
+
+        public String getyRef() {
+            return this.yRef;
+        }
+
+        public void setyRef(String yRef) {
+            this.yRef = yRef;
+        }
     }
 
     public static class StartsAndRuntimeWrapper {
@@ -510,6 +555,12 @@ public class ReportChartCreator {
             catch (InvalidArgumentException e) {
                 // Should never happen, but leave the color null in case it does.
             }
+
+            point.setType(pointInfo.getType());
+            point.setTitle(pointInfo.getTitle());
+            point.setxLabel(pointInfo.getxLabel());
+            point.setyLabel(pointInfo.getyLabel());
+            point.setyRef(pointInfo.getyRef());
 
             if (pointInfo.getDataType() == DataTypes.NUMERIC) {
                 point.setStats(new AnalogStatistics(pointInfo.getStartValue() == null ? null : pointInfo
