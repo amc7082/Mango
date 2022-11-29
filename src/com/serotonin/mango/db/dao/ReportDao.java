@@ -298,7 +298,7 @@ public class ReportDao extends BaseDao {
 
         // For each point.
         for (PointInfo pointInfo : points) {
-            System.out.println(pointInfo);
+            //System.out.println(pointInfo);
             DataPointVO point = pointInfo.getPoint();
             int dataType = point.getPointLocator().getDataTypeId();
 
