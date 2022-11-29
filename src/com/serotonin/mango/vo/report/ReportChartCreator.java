@@ -147,7 +147,7 @@ public class ReportChartCreator {
             if (ptsc.hasData()) {
                 if (inlinePrefix != null)
                     model.put("chartName", inlinePrefix + pointStat.getChartName());
-                pointStat.setImageData(ImageChartUtils.getChartData(ptsc, pointStat.getTitle(), pointStat.xLabel, pointStat.yLabel, pointStat.getyRef(), POINT_IMAGE_WIDTH, POINT_IMAGE_HEIGHT));
+                pointStat.setImageData(ImageChartUtils.getChartData(ptsc, pointStat.getType(), pointStat.getTitle(), pointStat.getxLabel(), pointStat.getyLabel(), pointStat.getyRef(), POINT_IMAGE_WIDTH, POINT_IMAGE_HEIGHT));
             }
         }
 
@@ -161,7 +161,7 @@ public class ReportChartCreator {
                 model.put("chartName", IMAGE_SERVLET + chartName);
             }
 
-            imageData = ImageChartUtils.getChartData(ptsc,true, null, null, null, null, IMAGE_WIDTH, IMAGE_HEIGHT);
+            imageData = ImageChartUtils.getChartData(ptsc,true, "line", null, null, null, null, IMAGE_WIDTH, IMAGE_HEIGHT);
         }
 
         List<EventInstance> events = null;
