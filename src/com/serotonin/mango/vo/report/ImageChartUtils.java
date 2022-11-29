@@ -18,8 +18,7 @@
  */
 package com.serotonin.mango.vo.report;
 
-import java.awt.Color;
-import java.awt.Paint;
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -55,20 +55,20 @@ public class ImageChartUtils {
     private static final int NUMERIC_DATA_INDEX = 0;
     private static final int DISCRETE_DATA_INDEX = 1;
 
-    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, String title, String xLabel, String yLabel, String yRef, OutputStream out, int width,
+    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, String type, String title, String xLabel, String yLabel, String yRef, OutputStream out, int width,
             int height) throws IOException {
-        writeChart(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), title, xLabel, yLabel, yRef, out, width, height);
+        writeChart(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), type, title, xLabel, yLabel, yRef, out, width, height);
     }
 
-    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, String title, String xLabel, String yLabel, String yRef, int width, int height) {
-        return getChartData(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), title, xLabel, yLabel, yRef, width, height);
+    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, String type, String title, String xLabel, String yLabel, String yRef, int width, int height) {
+        return getChartData(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), type, title, xLabel, yLabel, yRef, width, height);
     }
 
-    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, String title, String xLabel, String yLabel, String yRef,
+    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, String type, String title, String xLabel, String yLabel, String yRef,
             int width, int height) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            writeChart(pointTimeSeriesCollection, showLegend, title, xLabel, yLabel, yRef, out, width, height);
+            writeChart(pointTimeSeriesCollection, showLegend, type, title, xLabel, yLabel, yRef, out, width, height);
             return out.toByteArray();
         }
         catch (IOException e) {
@@ -76,7 +76,7 @@ public class ImageChartUtils {
         }
     }
 
-    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, String title, String xLabel, String yLabel, String yRef,
+    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, String type, String title, String xLabel, String yLabel, String yRef,
             OutputStream out, int width, int height) throws IOException {
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(title, xLabel, yLabel, null, showLegend, false, false);
@@ -90,10 +90,10 @@ public class ImageChartUtils {
 
         double numericMin = 0;
         double numericMax = 1;
-        if (pointTimeSeriesCollection.hasNumericData()) {
+        if (pointTimeSeriesCollection.hasNumericData() || type.equals("scatter")) {
             //            XYSplineRenderer numericRenderer = new XYSplineRenderer();
             //            numericRenderer.setBaseShapesVisible(false);
-            XYLineAndShapeRenderer numericRenderer = new XYLineAndShapeRenderer(true, false);
+            XYLineAndShapeRenderer numericRenderer = new XYLineAndShapeRenderer(!type.equals("scatter"), type.equals("scatter"));
 
             plot.setDataset(NUMERIC_DATA_INDEX, pointTimeSeriesCollection.getNumericTimeSeriesCollection());
             plot.setRenderer(NUMERIC_DATA_INDEX, numericRenderer);
@@ -102,6 +102,20 @@ public class ImageChartUtils {
                 Paint paint = pointTimeSeriesCollection.getNumericPaint().get(i);
                 if (paint != null)
                     numericRenderer.setSeriesPaint(i, paint, false);
+            }
+
+            // y ref
+            try {
+                double yRefDouble = Double.parseDouble(yRef);
+
+                TimeSeries tsl = pointTimeSeriesCollection.getNumericTimeSeriesCollection().getSeries(0);
+                long x1 = tsl.getTimePeriod(0).getFirstMillisecond();
+                long x2 = tsl.getNextTimePeriod().getLastMillisecond();
+
+                XYLineAnnotation line = new XYLineAnnotation(x1, yRefDouble, x2, yRefDouble, new BasicStroke(1.5f), Color.black);
+                plot.addAnnotation(line);
+            } catch (NumberFormatException | NullPointerException | IndexOutOfBoundsException e) {
+                // no reference line;
             }
 
             numericMin = plot.getRangeAxis().getLowerBound();
@@ -121,7 +135,7 @@ public class ImageChartUtils {
         else
             plot.getRangeAxis().setVisible(false);
 
-        if (pointTimeSeriesCollection.hasDiscreteData()) {
+        if (pointTimeSeriesCollection.hasDiscreteData() && (!type.equals("scatter"))) {
             XYStepRenderer discreteRenderer = new XYStepRenderer();
             plot.setRenderer(DISCRETE_DATA_INDEX, discreteRenderer, false);
 
