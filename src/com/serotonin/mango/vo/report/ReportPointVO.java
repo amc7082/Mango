@@ -86,6 +86,7 @@ public class ReportPointVO implements Serializable {
     private static final long serialVersionUID = -1;
     private static final int version = 2;
 
+    @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(version);
 
@@ -99,6 +100,7 @@ public class ReportPointVO implements Serializable {
         SerializationHelper.writeSafeUTF(out, referenceLine);
     }
 
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException {
         int ver = in.readInt();
 
