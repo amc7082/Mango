@@ -120,11 +120,11 @@
     
     function addPointToReport() {
         var pointId = $get("allPointsList");
-        addToReportPointsArray(pointId, "", true);
+        addToReportPointsArray(pointId, "", true, "line", "", "", "", "");
         writeReportPointsArray();
     }
     
-    function addToReportPointsArray(pointId, colour, consolidatedChart) {
+    function addToReportPointsArray(pointId, colour, consolidatedChart, chartType, chartTitle, xLabel, yLabel, referenceLine) {
         var data = getPointData(pointId);
         if (data) {
             // Missing names imply that the point was deleted, so ignore.
@@ -133,7 +133,12 @@
                 pointName : data.name,
                 pointType : data.dataTypeMessage,
                 colour : !colour ? (!data.chartColour ? "" : data.chartColour) : colour,
-                consolidatedChart : consolidatedChart
+                consolidatedChart : consolidatedChart,
+                chartType : chartType,
+                title : chartTitle,
+                xlabel : xLabel,
+                ylabel : yLabel,
+                referenceLine : referenceLine
             };
         }
     }
@@ -167,6 +172,30 @@
                         return "<input type='checkbox'"+ (data.consolidatedChart ? " checked='checked'" : "") +
                                 " onclick='updatePointConsolidatedChart("+ data.pointId +", this.checked)'/>";
                     },
+                    function(data) {
+                        return "<label for='line'>Line</label>" +
+                                "<input type='radio' id='line' name='chartType" + data.pointId + "' value='line'" + (data.chartType === "line" ? "checked='checked'" : "") +
+                                " onclick='updatePointChartType(" + data.pointId + ", \"lineChart\")'/>" +
+                                "<label for='scatter'>Scatter</label>" +
+                                "<input type='radio' id='scatter' name='chartType" + data.pointId + "' value='scatter'" + (data.chartType === "scatter" ? "checked='checked'" : "") +
+                                " onclick='updatePointChartType(" + data.pointId + ", \"scatter\")'/>";
+                    },
+                    function(data) {
+                        return "<input type='text' value='" + data.title + "' " +
+                                "onblur='updatePointChartTitle(" + data.pointId + ", this.value)'/>";
+                    },
+                    function(data) {
+                        return "<input type='text' value='" + data.xLabel + "' " +
+                            "onchange='updatePointXAxisLabel(" + data.pointId + ", this.value)'/>";
+                    },
+                    function(data) {
+                        return "<input type='text' value='" + data.yLabel + "' " +
+                            "onchange='updatePointYAxisLabel(" + data.pointId + ", this.value)'/>";
+                    },
+                    function(data) {
+                        return "<input type='text' value='" + data.referenceLine + "' " +
+                            "onblur='updatePointReferenceLine(" + data.pointId + ", this.value)'/>";
+                    },
                     function(data) { 
                             return "<img src='images/bullet_delete.png' class='ptr' "+
                                     "onclick='removeFromReportPointsArray("+ data.pointId +")'/>";
@@ -199,6 +228,43 @@
         var item = getElement(reportPointsArray, pointId, "pointId");
         if (item)
             item["consolidatedChart"] = consolidatedChart;
+    }
+
+    function updatePointChartType(pointId, type) {
+        console.log("Updating chart type with " + type);
+        var item = getElement(reportPointsArray, pointId, "pointId");
+        if (item) {
+            item["chartType"] = type;
+        }
+    }
+
+    function updatePointChartTitle(pointId, title) {
+        console.log("Updating chart title with " + title);
+        var item = getElement(reportPointsArray, pointId, "pointId");
+        if (item) {
+            item["title"] = title;
+        }
+    }
+
+    function updatePointXAxisLabel(pointId, label) {
+        var item = getElement(reportPointsArray, pointId, "pointId")
+        if (item) {
+            item["xlabel"] = label;
+        }
+    }
+
+    function updatePointYAxisLabel(pointId, label) {
+        var item = getElement(reportPointsArray, pointId, "pointId")
+        if (item) {
+            item["ylabel"] = label;
+        }
+    }
+
+    function updatePointReferenceLine(pointId, ref) {
+        var item = getElement(reportPointsArray, pointId, "pointId")
+        if (item) {
+            item["referenceLine"] = ref;
+        }
     }
     
     function updatePointsList() {
@@ -396,8 +462,19 @@
     function getReportPointIdsArray() {
         var points = new Array();
         for (var i=0; i<reportPointsArray.length; i++)
-            points[points.length] = { pointId: reportPointsArray[i].pointId, colour: reportPointsArray[i].colour,
-        		    consolidatedChart: reportPointsArray[i].consolidatedChart };
+            points[points.length] = {
+              pointId: reportPointsArray[i].pointId,
+              colour: reportPointsArray[i].colour,
+        	  consolidatedChart: reportPointsArray[i].consolidatedChart,
+              type: reportPointsArray[i].chartType,
+              title: reportPointsArray[i].title,
+              xLabel: reportPointsArray[i].xlabel,
+              yLabel: reportPointsArray[i].ylabel,
+              referenceLine: reportPointsArray[i].referenceLine
+            };
+        points.forEach(function(entry) {
+          console.log(entry);
+        })
         return points;
     }
     
@@ -592,6 +669,11 @@
                       <td><fmt:message key="reports.dataType"/></td>
                       <td><fmt:message key="reports.colour"/></td>
                       <td><fmt:message key="reports.consolidatedChart"/></td>
+                      <td><fmt:message key="reports.chartType"/></td>
+                      <td><fmt:message key="reports.chartTitle"/></td>
+                      <td><fmt:message key="reports.axisLabelX"/></td>
+                      <td><fmt:message key="reports.axisLabelY"/></td>
+                      <td><fmt:message key="reports.referenceLine"/></td>
                       <td></td>
                     </tr>
                   </tbody>
